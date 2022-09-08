@@ -3,31 +3,45 @@ import { db } from "../../models";
 const resolvers = {
   Query: {
     getAllUsers: async () => {
-      return await db.User.find();
+      return await db.User.model.find();
     },
-
-    user: async (_: any, args: { wallet_address: String }) => {
-      return await db.User.findOne({ wallet_address: args.wallet_address });
+    user: async (_: any, args: { wallet_address: string }) => {
+      return await db.User.query.findOne(args.wallet_address);
     },
   },
 
   Mutation: {
-    async createUser(_: any, args: { wallet_address: String }, { user }: any) {
+    async loginUser(
+      _: any,
+      args: { wallet_address: string },
+      { wallet_address }: { wallet_address: string }
+    ) {
       try {
-        const { wallet_address } = args;
-        const user = await new db.User({ wallet_address });
-        const result = await user.save();
-        return result;
-      } catch (err) {
-        console.log(err);
-        throw err;
+        if (!wallet_address) throw new Error("empty wallet");
+        const query = { wallet_address };
+        const user = await db.User.model.findOne(query);
+        if (!user) {
+          // const update = query;
+          const newUser = await db.User.mutation.createUser(wallet_address);
+          return {
+            data: newUser,
+            message: "success to create user",
+            status: true,
+          };
+        }
+        return { data: user, message: "success to login", status: true };
+      } catch (error: any) {
+        console.log(error.message);
+        return { data: null, message: error.message, status: false };
       }
     },
-    async deleteUser(_: any, args: { wallet_address: String }) {
+    async createUser(_: any, args: { wallet_address: string }, { user }: any) {
       try {
         const { wallet_address } = args;
-        const result = await db.User.deleteOne({ wallet_address });
-        return result;
+        // const user = new db.User({ wallet_address });
+        const user = db.User.mutation.createUser(wallet_address);
+        // const result = await user.save();
+        return user;
       } catch (err) {
         console.log(err);
         throw err;

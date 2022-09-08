@@ -11,6 +11,8 @@ const avatarSchema = new mongoose.Schema({
   skin: { type: mongoose.Types.ObjectId, default: null, ref: "clothes" },
   background: { type: mongoose.Types.ObjectId, default: null, ref: "clothes" },
   createdAt: { type: Date, default: Date.now },
+  base_image_url: { type: String, required: true },
+  overlapped_image_url: { type: String, required: true, default: null },
 });
 
 const Avatar = mongoose.model<mongoose.Document>("avatars", avatarSchema);

@@ -11,4 +11,7 @@ const clothesSchema = new mongoose.Schema({
 
 const Clothes = mongoose.model<mongoose.Document>("clothes", clothesSchema);
 
-export default Clothes;
+const query = {};
+const mutation = {};
+
+export default { model: Clothes, query, mutation };

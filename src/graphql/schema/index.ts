@@ -36,6 +36,16 @@ const typeDefs = gql`
     createdAt: String
   }
 
+  union IntOrString = IntBox | StringBox
+
+  type IntBox {
+    value: Int
+  }
+
+  type StringBox {
+    value: String
+  }
+
   type Query {
     hello: String!
     getAllUsers: [User!]!
@@ -46,6 +56,7 @@ const typeDefs = gql`
     getAvatar(token_id: Int!): Avatar!
     getAllClothes(wallet_address: String!): [Clothes!]!
     getClothesBatch(clothes_ids: [String]): [Clothes!]!
+    searchClothes(keyword: String, wallet_address: String): [Clothes!]!
   }
 
   type Mutation {

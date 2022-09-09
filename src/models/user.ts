@@ -45,5 +45,15 @@ export const query = {
       throw new Error(error.message);
     }
   },
+
+  findOneByWalletNotPopulate: async (wallet_address: string) => {
+    try {
+      const doc = await User.findOne({ wallet_address });
+      if (!doc) return null;
+      return doc.toObject() as IUser;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  },
 };
 export default { model: User, query, mutation };

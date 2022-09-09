@@ -1,35 +1,55 @@
 import { GraphQLArgs } from "graphql";
 import { db } from "../../models";
+import { caver } from "../../utils/web3-interact";
+
 const resolvers = {
   Query: {
     getAllUsers: async () => {
       return await db.User.model.find();
     },
     user: async (_: any, args: { wallet_address: string }) => {
-      return await db.User.query.findOne(args.wallet_address);
+      return await db.User.query.findOneByWallet(args.wallet_address);
     },
   },
 
   Mutation: {
     async loginUser(
       _: any,
-      args: { wallet_address: string },
-      { wallet_address }: { wallet_address: string }
+      args: {
+        wallet_address: string;
+        signature: string[];
+        signMessage: string;
+      },
+      { token }: { token: string }
     ) {
       try {
+        const { signature, wallet_address, signMessage } = args;
+
+        if (!signature || !signMessage || !wallet_address)
+          throw new Error("invalid params");
+        // const _signature = readJson(signature as string);
+
+        const isAuthenticated = await caver.validator.validateSignedMessage(
+          signMessage,
+          signature,
+          wallet_address
+        );
+        console.log(`isAuthenticated: ${isAuthenticated}`);
+
+        if (!isAuthenticated) throw new Error("empty wallet_address");
+
+        // return { wallet_address };
+
         if (!wallet_address) throw new Error("empty wallet");
-        const query = { wallet_address };
-        const user = await db.User.model.findOne(query);
+        const user = await db.User.query.findOneByWallet(wallet_address);
         if (!user) {
           // const update = query;
-          const newUser = await db.User.mutation.createUser(wallet_address);
-          return {
-            data: newUser,
-            message: "success to create user",
-            status: true,
-          };
+          await db.User.mutation.createUser(wallet_address);
+          const _user = await db.User.query.findOneByWallet(wallet_address);
+
+          return _user;
         }
-        return { data: user, message: "success to login", status: true };
+        return user;
       } catch (error: any) {
         console.log(error.message);
         return { data: null, message: error.message, status: false };

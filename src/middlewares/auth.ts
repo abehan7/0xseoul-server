@@ -1,43 +1,26 @@
 import express from "express";
 import { SignatureData } from "caver-js";
 import { caver } from "../utils/web3-interact";
+import { readJson } from "../utils/common";
 type ISignatureData = object | SignatureData | string[];
 
 export const authContext = async ({ req }: { req: express.Request }) => {
   try {
-    // if (!req.headers.authorization)
-
-    //   throw new AuthenticationError("empty token");
-    // if (!req.headers.authorization) return { user: undefined };
-
-    // const token = req.headers.authorization.substr(7);
     const { signature, wallet_address, signmessage } = req.headers;
-    const _signature = signature as string;
-    // console.log(req.headers);
-    // console.log(signature, signmessage, wallet_address);
-    if (!signature || !signmessage || !wallet_address)
-      return { wallet_address: undefined };
-    const toArr = _signature.split(",");
-    console.log(`toArr:`, toArr);
 
-    // const publicKey = caver.utils.recoverPublicKey(
-    //   signmessage as string,
-    //   toArr as ISignatureData
-    // );
-    // console.log(`publicKey: ${publicKey}`);
+    if (!signature || !signmessage || !wallet_address)
+      throw new Error("invalid params");
+    const _signature = readJson(signature as string);
 
     const isAuthenticated = await caver.validator.validateSignedMessage(
       signmessage as string,
-      toArr,
+      _signature,
       wallet_address as string
     );
     console.log(`isAuthenticated: ${isAuthenticated}`);
 
     if (!isAuthenticated) throw new Error("empty wallet_address");
 
-    // const user = "this user is authenticated";
-    // const user = users.find((user) => user.token === token);
-    // if (!user) throw new AuthenticationError('invalid token');
     return { wallet_address };
   } catch (error: any) {
     console.log(error.message);

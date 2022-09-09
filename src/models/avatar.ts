@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IAvatar } from "../interfaces/avatar";
 
 const avatarSchema = new mongoose.Schema({
   owner: { type: String, ref: "users", required: true },
@@ -17,4 +18,29 @@ const avatarSchema = new mongoose.Schema({
 
 const Avatar = mongoose.model<mongoose.Document>("avatars", avatarSchema);
 
-export default Avatar;
+const query = {
+  findOneByTokenId: async (token_id: number) => {
+    try {
+      const doc = await Avatar.findOne({ token_id })
+        .populate("hair")
+        .populate("clothing")
+        .populate("eyes")
+        .populate("mouth")
+        .populate("off_hand")
+        .populate("skin")
+        .populate("background");
+
+      // console.log(doc);
+
+      if (!doc) return null;
+      return doc.toObject() as IAvatar;
+    } catch (error: any) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  },
+};
+
+const mutation = {};
+
+export default { model: Avatar, query, mutation };

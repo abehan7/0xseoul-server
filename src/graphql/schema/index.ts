@@ -1,26 +1,29 @@
 import { gql } from "apollo-server-express";
 
 const typeDefs = gql`
-  type User {
-    _id: ID
-    wallet_address: String
-    holding_nfts: [Int]
-    createdAt: String
-    isAdmin: Boolean
-  }
-
   type Avatar {
     _id: ID
     owner: String
     token_id: Int
-    hair: String
-    clothing: String
-    eyes: String
-    mouth: String
-    off_hand: String
-    skin: String
-    background: String
+    hair: Clothes
+    clothing: Clothes
+    eyes: Clothes
+    mouth: Clothes
+    off_hand: Clothes
+    skin: Clothes
+    background: Clothes
     createdAt: String
+    base_image_url: String
+    overlapped_image_url: String
+  }
+
+  type User {
+    _id: ID
+    wallet_address: String
+    holding_avatars: [Avatar]
+    holding_clothes: [Clothes]
+    createdAt: String
+    isAdmin: Boolean
   }
 
   type Clothes {
@@ -40,14 +43,18 @@ const typeDefs = gql`
     authenticate(wallet_address: String): String
     getAllAvatars: [Avatar!]!
     get30Avatars(avatar_id: String): [Avatar!]!
-    avatar(wallet_address: String): Avatar!
-    getAllClothes: [Clothes!]!
+    getAvatar(token_id: Int!): Avatar!
+    getAllClothes(wallet_address: String!): [Clothes!]!
     getClothesBatch(clothes_ids: [String]): [Clothes!]!
   }
 
   type Mutation {
     createUser(wallet_address: String!): User
-    loginUser(wallet_address: String!): User
+    loginUser(
+      wallet_address: String!
+      signature: [String!]
+      signMessage: String!
+    ): User
   }
 `;
 

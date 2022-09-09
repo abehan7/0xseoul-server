@@ -3,7 +3,18 @@ import { IUser } from "../interfaces/user";
 
 const userSchema = new mongoose.Schema({
   wallet_address: { type: String, required: true },
-  holding_nfts: { type: [Number], required: true, default: [] },
+  holding_avatars: {
+    type: [mongoose.Types.ObjectId],
+    required: true,
+    default: [],
+    ref: "avatars",
+  },
+  holding_clothes: {
+    type: [mongoose.Types.ObjectId],
+    required: true,
+    default: [],
+    ref: "clothes",
+  },
   createdAt: { type: Date, default: Date.now },
   isAdmin: { type: Boolean, default: false },
 });
@@ -22,9 +33,12 @@ export const mutation = {
   },
 };
 export const query = {
-  findOne: async (wallet_address: string) => {
+  findOneByWallet: async (wallet_address: string) => {
     try {
-      const doc = await User.findOne({ wallet_address });
+      const doc = await User.findOne({ wallet_address })
+        .populate("holding_avatars")
+        .populate("holding_clothes");
+
       if (!doc) return null;
       return doc.toObject() as IUser;
     } catch (error: any) {

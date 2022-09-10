@@ -13,20 +13,45 @@ const resolvers = {
       });
     },
 
+    filterClothes: async (
+      _: any,
+      args: { type: string; wallet_address: string }
+    ) => {
+      try {
+        const { type, wallet_address } = args;
+        // console.log(type, wallet_address);
+        if (!type || !wallet_address) throw new Error("missing params");
+
+        const toLowercase = wallet_address.toLowerCase();
+        const user = await db.User.query.findOneByWalletNotPopulate(
+          toLowercase
+        );
+        if (!user) throw new Error("User not found");
+        const isAllItems = type === "all_items";
+
+        const query = { _id: { $in: user.holding_clothes } } as any;
+        if (!isAllItems) query.type = args.type;
+        const clothes = await db.Clothes.model.find(query);
+        return clothes;
+      } catch (error: any) {
+        console.log(error.message);
+        return [];
+      }
+    },
+
     searchClothes: async (
       _: any,
       args: { keyword: string; wallet_address: string }
     ) => {
       try {
+        const toLowercase = args.wallet_address.toLowerCase();
         const user = await db.User.query.findOneByWalletNotPopulate(
-          args.wallet_address
+          toLowercase
         );
         if (!user) throw new Error("User not found");
-        const userClothesIds = user.holding_clothes.map((clothes) => clothes);
         const isNumber = /^\d+$/.test(args.keyword);
-        // { token_id: { $eq: Number(args.keyword) ?? 0 } },
         const query = {
-          _id: { $in: userClothesIds },
+          _id: { $in: user.holding_clothes },
           $or: [
             { name: { $regex: args.keyword, $options: "ix" } },
             { type: { $regex: args.keyword, $options: "ix" } },

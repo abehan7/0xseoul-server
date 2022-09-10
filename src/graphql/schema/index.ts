@@ -57,6 +57,7 @@ const typeDefs = gql`
     getAllClothes(wallet_address: String!): [Clothes!]!
     getClothesBatch(clothes_ids: [String]): [Clothes!]!
     searchClothes(keyword: String, wallet_address: String): [Clothes!]!
+    filterClothes(type: String, wallet_address: String): [Clothes!]!
   }
 
   type Mutation {

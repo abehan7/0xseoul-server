@@ -23,14 +23,18 @@ const resolvers = {
         );
         if (!user) throw new Error("User not found");
         const userClothesIds = user.holding_clothes.map((clothes) => clothes);
-
+        const isNumber = /^\d+$/.test(args.keyword);
+        // { token_id: { $eq: Number(args.keyword) ?? 0 } },
         const query = {
           _id: { $in: userClothesIds },
           $or: [
             { name: { $regex: args.keyword, $options: "ix" } },
             { type: { $regex: args.keyword, $options: "ix" } },
           ],
-        };
+        } as any;
+
+        if (isNumber)
+          query.$or.push({ token_id: { $eq: Number(args.keyword) } });
 
         const clothes = await db.Clothes.model.find(query);
 

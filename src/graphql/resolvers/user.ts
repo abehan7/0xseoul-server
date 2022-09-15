@@ -24,6 +24,7 @@ const resolvers = {
     ) {
       try {
         const { signature, wallet_address, signMessage } = args;
+        // console.log(signature, wallet_address, signMessage);
 
         if (!signature || !signMessage || !wallet_address)
           throw new Error("invalid params");
